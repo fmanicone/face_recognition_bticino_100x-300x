@@ -21,11 +21,11 @@ The system is built as an event-driven microservice architecture. An MQTT messag
 ```
                          BTicino Intercom (on the wall)
                     ┌──────────────────────────────────────┐
-                    │  Custom firmware + c300x-controller   │
-                    │  ┌─────────┐  ┌─────────┐  ┌──────┐ │
-                    │  │  RTSP   │  │  HTTP   │  │ MQTT │ │
-                    │  │ :6554   │  │ :8080   │  │client│ │
-                    │  └────┬────┘  └────▲────┘  └──┬───┘ │
+                    │  Custom firmware + c300x-controller  │
+                    │  ┌─────────┐  ┌─────────┐  ┌──────┐  │
+                    │  │  RTSP   │  │  HTTP   │  │ MQTT │  │
+                    │  │ :6554   │  │ :8080   │  │client│  │
+                    │  └────┬────┘  └────▲────┘  └──┬───┘  │
                     └───────┼────────────┼──────────┼──────┘
                             │            │          │
                       video │     unlock │   ring   │
@@ -64,7 +64,7 @@ The system is built as an event-driven microservice architecture. An MQTT messag
                     │ │dashboard │  │   face-    │◄─┘      │
                     │ │  :5050   │  │ collector  │         │
                     │ └──────────┘  └────────────┘         │
-                    │         Server (Docker)               │
+                    │         Server (Docker)              │
                     └──────────────────────────────────────┘
 ```
 
@@ -74,19 +74,19 @@ The system is built as an event-driven microservice architecture. An MQTT messag
  Doorbell ring
       │
       ▼
- ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+ ┌──────────────────┐     ┌───────────────────┐     ┌──────────────────┐
  │  1. CAPTURE      │     │  2. DETECT        │     │  3. EMBED        │
  │  4 frames from   │────▶│  InsightFace      │────▶│  ArcFace ResNet  │
  │  RTSP stream     │     │  SCRFD model      │     │  512-dim vector  │
  │  (1s apart)      │     │  face detection   │     │  L2-normalized   │
- └─────────────────┘     └──────────────────┘     └────────┬────────┘
-                                                            │
-                                                            ▼
+ └──────────────────┘     └───────────────────┘     └─────────┬────────┘
+                                                              │
+                                                              ▼
  ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
- │  6. DECIDE       │     │  5. AGGREGATE     │     │  4. SEARCH       │
- │  Notify via      │◀────│  Vote across 4    │◀────│  FAISS cosine    │
- │  Telegram +      │     │  frames (need     │     │  similarity      │
- │  auto-unlock     │     │  2+ matches)      │     │  top-10 nearest  │
+ │  6. DECIDE      │     │  5. AGGREGATE    │     │  4. SEARCH      │
+ │  Notify via     │◀────│  Vote across 4   │◀────│  FAISS cosine   │
+ │  Telegram +     │     │  frames (need    │     │  similarity     │
+ │  auto-unlock    │     │  2+ matches)     │     │  top-10 nearest │
  └─────────────────┘     └──────────────────┘     └─────────────────┘
 ```
 
