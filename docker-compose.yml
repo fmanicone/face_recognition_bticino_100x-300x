@@ -1,0 +1,139 @@
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./services/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "health", "-m", "ping", "-q", "0"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  face-recognition:
+    build:
+      context: ./services
+      dockerfile: face-recognition-service/Dockerfile
+    environment:
+      - MQTT_HOST=mosquitto
+      - DB_PATH=/shared_frames/faces.db
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames
+      - ./services/data:/app/data
+      - insightface_models:/root/.insightface
+      - ../snapshots:/snapshots:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  aggregator:
+    build: ./services/aggregator
+    environment:
+      - MQTT_HOST=mosquitto
+      - MATCH_THRESHOLD=0.45
+      - FRAMES_EXPECTED=4
+      - AGGREGATION_TIMEOUT_S=15
+      - MIN_VOTES=2
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  notifier:
+    build: ./services/notifier
+    environment:
+      - MQTT_HOST=mosquitto
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - SHARED_FRAMES_DIR=/shared_frames
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  face-collector:
+    build:
+      context: ./services
+      dockerfile: face-collector/Dockerfile
+    environment:
+      - MQTT_HOST=mosquitto
+      - SHARED_FRAMES=/shared_frames
+      - DB_PATH=/shared_frames/faces.db
+      - FRAME_COOLDOWN_S=2.5
+      - SESSION_MAX_FRAMES=4
+      - SESSION_RESET_S=5.0
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames
+      - ../snapshots:/snapshots:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  doorbell-trigger:
+    build: ./services/doorbell-trigger
+    ports:
+      - "5001:5001"
+    environment:
+      - MQTT_HOST=mosquitto
+      - DEVICE_ID=frontdoor
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  doorbell-worker:
+    build: ./services/doorbell-worker
+    network_mode: host
+    environment:
+      - MQTT_HOST=127.0.0.1
+      - MQTT_PORT=1883
+      - RTSP_URL=rtsp://${INTERCOM_IP}:6554/doorbell-video
+      - SHARED_FRAMES_DIR=/shared_frames
+      - DEVICE_ID=frontdoor
+      - FRAMES_TO_SAVE=4
+      - FRAME_INTERVAL_S=1.0
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames
+
+  gate-opener:
+    build: ./services/gate-opener
+    network_mode: host
+    environment:
+      - MQTT_HOST=127.0.0.1
+      - MQTT_PORT=1883
+      - DB_PATH=/shared_frames/faces.db
+      - UNLOCK_URL=http://${INTERCOM_IP}:8080/unlock?id=default
+      - MIN_CONFIDENCE=0.50
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames
+
+  dashboard:
+    build:
+      context: ./services
+      dockerfile: dashboard/Dockerfile
+    ports:
+      - "5050:5000"
+    environment:
+      - MQTT_HOST=mosquitto
+      - DB_PATH=/shared_frames/faces.db
+      - SHARED_FRAMES=/shared_frames
+      - STATIC_DIR=/app/static
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - frames_data:/shared_frames
+      - ../snapshots:/snapshots:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+volumes:
+  frames_data:
+  insightface_models:

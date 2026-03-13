@@ -1,0 +1,9 @@
+flask
+paho-mqtt
+numpy
+opencv-python-headless
+insightface
+onnxruntime
+faiss-cpu
+pytest
+python-dotenv
