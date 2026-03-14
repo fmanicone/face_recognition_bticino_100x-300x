@@ -14,6 +14,16 @@ This project adds **AI-powered face recognition** to the BTicino Classe 300X (or
 - **Quality filtering** — rejects blurry, side-profile, or distant faces automatically
 - **Fully containerized** — 9 Docker microservices communicating via MQTT
 
+## ❤️ Support the Project
+
+This project is **free and open-source**, but maintaining and improving it requires time and effort.
+
+<p align="center">
+<a href="https://www.buymeacoffee.com/multififa" target="_blank">
+<img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="45">
+</a>
+</p>
+
 ### How It Works
 
 The system is built as an event-driven microservice architecture. An MQTT message bus decouples all services, making the system modular and resilient.
@@ -720,4 +730,15 @@ docker compose logs dashboard | head -20
 
 # Rebuild
 docker compose up -d --build dashboard
+
+## ❤️ Support the Project
+
+This project is **free and open-source**, but maintaining and improving it requires time and effort.
+
+<p align="center">
+<a href="https://www.buymeacoffee.com/multififa" target="_blank">
+<img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="45">
+</a>
+</p>
+
 ```
