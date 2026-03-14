@@ -602,6 +602,16 @@ For each doorbell ring:
 
 ---
 
+## ❤️ Support the Project
+
+This project is **free and open-source**, but maintaining and improving it requires time and effort.
+
+<p align="center">
+<a href="https://www.buymeacoffee.com/multififa" target="_blank">
+<img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="45">
+</a>
+</p>
+
 ## 11. Testing
 
 ### 11.1 Verify Services
@@ -730,6 +740,7 @@ docker compose logs dashboard | head -20
 
 # Rebuild
 docker compose up -d --build dashboard
+```
 
 ## ❤️ Support the Project
 
@@ -740,5 +751,3 @@ This project is **free and open-source**, but maintaining and improving it requi
 <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="45">
 </a>
 </p>
-
-```
